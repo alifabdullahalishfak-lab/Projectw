@@ -1,0 +1,329 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-mono, monospace); }
+  .board { padding: 1rem 0; }
+  .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px; }
+  .app-title { font-size: 20px; font-weight: 500; color: var(--color-text-primary); letter-spacing: -0.5px; }
+  .revenue-cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .rev-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+  .rev-label { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .rev-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .rev-value.green { color: #1D9E75; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); padding-bottom: 0; }
+  .tab { padding: 8px 16px; font-size: 13px; font-family: var(--font-mono); cursor: pointer; border: none; background: none; color: var(--color-text-secondary); border-bottom: 2px solid transparent; margin-bottom: -0.5px; transition: all 0.15s; }
+  .tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
+  .tab:hover:not(.active) { color: var(--color-text-primary); }
+  .tab-badge { display: inline-block; background: var(--color-background-secondary); border-radius: 999px; font-size: 10px; padding: 1px 6px; margin-left: 6px; color: var(--color-text-secondary); }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .panel-info { font-size: 12px; color: var(--color-text-tertiary); }
+  .add-btn { font-family: var(--font-mono); font-size: 12px; padding: 6px 14px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); cursor: pointer; }
+  .project-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .project-table th { text-align: left; padding: 8px 10px; color: var(--color-text-tertiary); font-weight: 400; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .project-table td { padding: 10px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: middle; color: var(--color-text-primary); }
+  .project-table tr:last-child td { border-bottom: none; }
+  .project-table tr:hover td { background: var(--color-background-secondary); }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 8px; border-radius: 999px; font-weight: 500; }
+  .s-progress { background: #E6F1FB; color: #185FA5; }
+  .s-done { background: #EAF3DE; color: #3B6D11; }
+  .s-review { background: #FAEEDA; color: #854F0B; }
+  .s-pending { background: #F1EFE8; color: #5F5E5A; }
+  .s-revision { background: #FBEAF0; color: #993556; }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .p-high { background: #E24B4A; }
+  .p-medium { background: #EF9F27; }
+  .p-low { background: #1D9E75; }
+  .timer-cell { font-family: var(--font-mono); font-size: 11px; }
+  .timer-active { color: #E24B4A; }
+  .timer-ok { color: #1D9E75; }
+  .timer-warn { color: #EF9F27; }
+  .timer-off { color: var(--color-text-tertiary); }
+  .start-btn { font-family: var(--font-mono); font-size: 10px; padding: 4px 10px; border: 0.5px solid var(--color-border-secondary); background: none; border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); }
+  .start-btn.started { background: var(--color-background-success); color: var(--color-text-success); border-color: var(--color-border-success); }
+  .price-cell { font-family: var(--font-mono); color: #1D9E75; font-weight: 500; }
+  .action-btn { background: none; border: none; cursor: pointer; font-size: 14px; padding: 2px 5px; color: var(--color-text-tertiary); }
+  .action-btn:hover { color: var(--color-text-primary); }
+  .modal-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1.2rem; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.6px; }
+  .form-input { font-family: var(--font-mono); font-size: 13px; padding: 8px 10px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: var(--color-background-secondary); color: var(--color-text-primary); width: 100%; }
+  .form-input:focus { outline: none; border-color: var(--color-text-primary); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.2rem; }
+  .btn-cancel { font-family: var(--font-mono); font-size: 12px; padding: 8px 16px; border: 0.5px solid var(--color-border-secondary); background: none; border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); }
+  .btn-save { font-family: var(--font-mono); font-size: 12px; padding: 8px 16px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; border-radius: var(--border-radius-md); cursor: pointer; }
+  .empty-state { text-align: center; padding: 2.5rem; color: var(--color-text-tertiary); font-size: 13px; }
+  .platform-tag { font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 500; }
+  .pt-fiverr { background: #E6F1FB; color: #185FA5; }
+  .pt-upwork { background: #EAF3DE; color: #3B6D11; }
+  .pt-outside { background: #FBEAF0; color: #993556; }
+  .notes-cell { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-tertiary); font-size: 11px; }
+</style>
+
+<div class="board">
+  <h2 class="sr-only">Freelance Project Management Board with countdown timers and revenue tracking</h2>
+  <div class="header-bar">
+    <div class="app-title">/ project board</div>
+    <div id="last-saved" style="font-size:11px;color:var(--color-text-tertiary);"></div>
+  </div>
+
+  <div class="revenue-cards" id="revenue-cards"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="panel-content"></div>
+
+  <div id="modal-container"></div>
+</div>
+
+<script>
+const PLATFORMS = ['fiverr', 'upwork', 'outside'];
+const PLATFORM_LABELS = { fiverr: 'Fiverr', upwork: 'Upwork', outside: 'Outside Market' };
+const STATUS_OPTIONS = ['In Progress', 'Done', 'Review', 'Pending', 'Revision'];
+const PRIORITY_OPTIONS = ['High', 'Medium', 'Low'];
+const TAG_OPTIONS = ['Explainer', 'Motion', 'Branding', 'Editing', 'AI Video', 'Social', 'Other'];
+
+let state = { projects: [], activePlatform: 'fiverr', tick: 0 };
+
+async function load() {
+  try {
+    const r = await window.storage.get('freelance_board_v2');
+    if (r && r.value) {
+      const saved = JSON.parse(r.value);
+      state.projects = saved.projects || [];
+    }
+  } catch(e) {}
+}
+
+async function save() {
+  try {
+    await window.storage.set('freelance_board_v2', JSON.stringify({ projects: state.projects }));
+    document.getElementById('last-saved').textContent = 'saved ' + new Date().toLocaleTimeString();
+  } catch(e) {}
+}
+
+function genId() { return 'p' + Date.now() + Math.random().toString(36).slice(2,6); }
+
+function getStatusClass(s) {
+  if (s === 'In Progress') return 's-progress';
+  if (s === 'Done') return 's-done';
+  if (s === 'Review') return 's-review';
+  if (s === 'Pending') return 's-pending';
+  if (s === 'Revision') return 's-revision';
+  return 's-pending';
+}
+
+function getPriorityClass(p) {
+  if (p === 'High') return 'p-high';
+  if (p === 'Medium') return 'p-medium';
+  return 'p-low';
+}
+
+function formatCountdown(project) {
+  if (!project.started || !project.startedAt || !project.endDate) return { text: '—', cls: 'timer-off' };
+  const end = new Date(project.endDate).getTime() + 86400000;
+  const now = Date.now();
+  const diff = end - now;
+  if (diff <= 0) return { text: 'OVERDUE', cls: 'timer-active' };
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const text = `${days}d ${hours}h ${mins}m`;
+  const cls = days <= 1 ? 'timer-active' : days <= 3 ? 'timer-warn' : 'timer-ok';
+  return { text, cls };
+}
+
+function totalFor(platform) {
+  return state.projects.filter(p => p.platform === platform).reduce((s, p) => s + (parseFloat(p.price) || 0), 0);
+}
+
+function grandTotal() { return PLATFORMS.reduce((s, pl) => s + totalFor(pl), 0); }
+
+function renderRevCards() {
+  const c = document.getElementById('revenue-cards');
+  const fmt = v => '$' + v.toLocaleString('en', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  c.innerHTML = `
+    <div class="rev-card"><div class="rev-label">Fiverr</div><div class="rev-value">${fmt(totalFor('fiverr'))}</div></div>
+    <div class="rev-card"><div class="rev-label">Upwork</div><div class="rev-value">${fmt(totalFor('upwork'))}</div></div>
+    <div class="rev-card"><div class="rev-label">Outside</div><div class="rev-value">${fmt(totalFor('outside'))}</div></div>
+    <div class="rev-card"><div class="rev-label">Total Revenue</div><div class="rev-value green">${fmt(grandTotal())}</div></div>
+  `;
+}
+
+function renderTabs() {
+  const t = document.getElementById('tabs');
+  t.innerHTML = PLATFORMS.map(pl => {
+    const count = state.projects.filter(p => p.platform === pl).length;
+    const active = pl === state.activePlatform ? 'active' : '';
+    return `<button class="tab ${active}" onclick="switchTab('${pl}')">${PLATFORM_LABELS[pl]}<span class="tab-badge">${count}</span></button>`;
+  }).join('');
+}
+
+function renderPanel() {
+  const projects = state.projects.filter(p => p.platform === state.activePlatform);
+  const pl = state.activePlatform;
+  const ptClass = { fiverr: 'pt-fiverr', upwork: 'pt-upwork', outside: 'pt-outside' }[pl];
+
+  let rows = '';
+  if (projects.length === 0) {
+    rows = `<tr><td colspan="9"><div class="empty-state">No projects yet. Hit "+ New Project" to add one.</div></td></tr>`;
+  } else {
+    rows = projects.map(p => {
+      const timer = formatCountdown(p);
+      const startLabel = p.started ? 'started' : 'start';
+      const startCls = p.started ? 'started' : '';
+      const priceFmt = p.price ? '$' + parseFloat(p.price).toLocaleString('en', {minimumFractionDigits:0,maximumFractionDigits:0}) : '—';
+      return `<tr>
+        <td style="max-width:160px;font-weight:500;font-size:13px;">${p.name || '—'}</td>
+        <td><span class="status-badge ${getStatusClass(p.status)}">${p.status}</span></td>
+        <td>${p.assignee || '—'}</td>
+        <td style="font-size:11px;">${p.endDate || '—'}</td>
+        <td><span class="priority-dot ${getPriorityClass(p.priority)}"></span> ${p.priority}</td>
+        <td class="price-cell">${priceFmt}</td>
+        <td class="timer-cell ${timer.cls}">${timer.text}</td>
+        <td><button class="start-btn ${startCls}" onclick="toggleStart('${p.id}')">${startLabel}</button></td>
+        <td>
+          <button class="action-btn" onclick="editProject('${p.id}')">✎</button>
+          <button class="action-btn" onclick="deleteProject('${p.id}')">×</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('panel-content').innerHTML = `
+    <div class="panel-header">
+      <div class="panel-info">${projects.length} project${projects.length !== 1 ? 's' : ''} · $${totalFor(pl).toLocaleString('en',{minimumFractionDigits:0})} total</div>
+      <button class="add-btn" onclick="openModal(null)">+ New Project</button>
+    </div>
+    <div style="overflow-x:auto;">
+    <table class="project-table">
+      <thead>
+        <tr>
+          <th>Project</th><th>Status</th><th>Client</th><th>Deadline</th><th>Priority</th><th>Price</th><th>Time Left</th><th>Timer</th><th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+  `;
+}
+
+function render() {
+  renderRevCards();
+  renderTabs();
+  renderPanel();
+}
+
+function switchTab(pl) {
+  state.activePlatform = pl;
+  render();
+}
+
+function toggleStart(id) {
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+  if (!p.started) {
+    p.started = true;
+    p.startedAt = Date.now();
+  } else {
+    p.started = false;
+    p.startedAt = null;
+  }
+  save();
+  render();
+}
+
+function deleteProject(id) {
+  state.projects = state.projects.filter(p => p.id !== id);
+  save();
+  render();
+}
+
+function openModal(id) {
+  const existing = id ? state.projects.find(p => p.id === id) : null;
+  const m = existing || { id: genId(), platform: state.activePlatform, name: '', status: 'In Progress', assignee: '', startDate: '', endDate: '', priority: 'Medium', price: '', tags: '', notes: '', started: false, startedAt: null };
+
+  const statusOpts = STATUS_OPTIONS.map(s => `<option ${m.status === s ? 'selected' : ''}>${s}</option>`).join('');
+  const prioOpts = PRIORITY_OPTIONS.map(s => `<option ${m.priority === s ? 'selected' : ''}>${s}</option>`).join('');
+  const platOpts = PLATFORMS.map(s => `<option value="${s}" ${m.platform === s ? 'selected' : ''}>${PLATFORM_LABELS[s]}</option>`).join('');
+
+  document.getElementById('modal-container').innerHTML = `
+    <div class="modal-bg" onclick="closeModal(event)">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-title">${existing ? 'Edit Project' : 'New Project'}</div>
+        <div class="form-grid">
+          <div class="form-group full"><div class="form-label">Project Name</div><input class="form-input" id="m-name" value="${m.name}" placeholder="e.g. UAE Business Explainer Video"/></div>
+          <div class="form-group"><div class="form-label">Platform</div><select class="form-input" id="m-platform">${platOpts}</select></div>
+          <div class="form-group"><div class="form-label">Client Name</div><input class="form-input" id="m-assignee" value="${m.assignee}" placeholder="Client or company"/></div>
+          <div class="form-group"><div class="form-label">Status</div><select class="form-input" id="m-status">${statusOpts}</select></div>
+          <div class="form-group"><div class="form-label">Priority</div><select class="form-input" id="m-priority">${prioOpts}</select></div>
+          <div class="form-group"><div class="form-label">Start Date</div><input class="form-input" id="m-start" type="date" value="${m.startDate}"/></div>
+          <div class="form-group"><div class="form-label">Deadline</div><input class="form-input" id="m-end" type="date" value="${m.endDate}"/></div>
+          <div class="form-group"><div class="form-label">Price (USD)</div><input class="form-input" id="m-price" type="number" value="${m.price}" placeholder="0"/></div>
+          <div class="form-group"><div class="form-label">Tags</div><input class="form-input" id="m-tags" value="${m.tags}" placeholder="Motion, Explainer, AI Video"/></div>
+          <div class="form-group full"><div class="form-label">Notes</div><input class="form-input" id="m-notes" value="${m.notes}" placeholder="Any extra info about the project..."/></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+          <button class="btn-save" onclick="saveProject('${m.id}', ${!!existing})">Save Project</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function closeModal(e) {
+  if (!e || e.target.classList.contains('modal-bg')) {
+    document.getElementById('modal-container').innerHTML = '';
+  }
+}
+
+function editProject(id) { openModal(id); }
+
+function saveProject(id, isEdit) {
+  const proj = {
+    id,
+    name: document.getElementById('m-name').value.trim(),
+    platform: document.getElementById('m-platform').value,
+    assignee: document.getElementById('m-assignee').value.trim(),
+    status: document.getElementById('m-status').value,
+    priority: document.getElementById('m-priority').value,
+    startDate: document.getElementById('m-start').value,
+    endDate: document.getElementById('m-end').value,
+    price: document.getElementById('m-price').value,
+    tags: document.getElementById('m-tags').value.trim(),
+    notes: document.getElementById('m-notes').value.trim(),
+  };
+  if (!proj.name) { alert('Project name is required.'); return; }
+
+  if (isEdit) {
+    const idx = state.projects.findIndex(p => p.id === id);
+    if (idx !== -1) {
+      const old = state.projects[idx];
+      proj.started = old.started;
+      proj.startedAt = old.startedAt;
+      state.projects[idx] = proj;
+    }
+  } else {
+    proj.started = false;
+    proj.startedAt = null;
+    state.projects.push(proj);
+  }
+
+  state.activePlatform = proj.platform;
+  document.getElementById('modal-container').innerHTML = '';
+  save();
+  render();
+}
+
+async function init() {
+  await load();
+  render();
+  setInterval(() => { renderPanel(); renderRevCards(); }, 30000);
+}
+
+init();
+</script>
