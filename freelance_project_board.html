@@ -1,76 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Management Board</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; transition: all 0.2s; }
-        .card:hover { border-color: #3b82f6; }
-        .stat-label { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        input, select { background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; padding: 8px; }
-    </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Alif — Finance Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh;padding:2rem 1rem}
+.wrap{max-width:720px;margin:0 auto}
+h1{font-size:18px;font-weight:500;margin-bottom:1.5rem;color:#1a1a1a}
+.section{background:#fff;border:0.5px solid rgba(0,0,0,0.12);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.sec-title{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem}
+.income-row{display:flex;gap:10px;align-items:center}
+.income-row input{flex:1;padding:10px 14px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:16px;background:#f9f9f7;color:#1a1a1a}
+.income-row input:focus{outline:none;border-color:rgba(0,0,0,0.4)}
+.btn{padding:8px 16px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:transparent;color:#1a1a1a;font-size:13px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#f5f5f3}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{opacity:.85;background:#1a1a1a}
+.btn-danger{border-color:rgba(163,45,45,0.4);color:#a32d2d}
+.btn-danger:hover{background:#fcebeb}
+.btn-warn{background:#a32d2d;color:#fff;border-color:#a32d2d}
+.btn-warn:hover{opacity:.85;background:#a32d2d}
+.buckets{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:1rem}
+.bucket{background:#f5f5f3;border-radius:8px;padding:.75rem .85rem}
+.b-label{font-size:10px;color:#888;margin-bottom:3px;font-weight:500}
+.b-pct{font-size:10px;color:#aaa;float:right}
+.b-amt{font-size:16px;font-weight:500;color:#1a1a1a}
+.b-bar{height:3px;border-radius:2px;margin-top:7px;background:#e0e0dc}
+.b-fill{height:100%;border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:#888;font-weight:500;padding:6px 8px;border-bottom:0.5px solid rgba(0,0,0,0.1)}
+td{padding:7px 8px;border-bottom:0.5px solid rgba(0,0,0,0.08);color:#1a1a1a}
+tr:last-child td{border-bottom:none}
+.total-row td{font-weight:500;border-top:0.5px solid rgba(0,0,0,0.15);border-bottom:none;background:#f5f5f3}
+.empty{color:#bbb;font-size:13px;text-align:center;padding:1.5rem 0}
+.confirm-box{background:#fcebeb;border:0.5px solid rgba(163,45,45,0.3);border-radius:8px;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:.75rem}
+.confirm-box p{font-size:13px;color:#a32d2d}
+.confirm-btns{display:flex;gap:8px;flex-shrink:0}
+.receipt-card{border:0.5px solid rgba(0,0,0,0.1);border-radius:8px;padding:1rem;margin-bottom:.75rem}
+.receipt-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.75rem}
+.receipt-title{font-size:13px;font-weight:500;color:#1a1a1a}
+.receipt-date{font-size:11px;color:#aaa}
+.receipt-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 16px;font-size:12px}
+.receipt-item{display:flex;justify-content:space-between}
+.rk{color:#888}
+.rv{font-weight:500;color:#1a1a1a}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#e6f1fb;color:#185fa5;margin-bottom:4px}
+.note{font-size:12px;color:#888;margin-top:.5rem;font-style:italic}
+.del-confirm{display:inline-flex;gap:6px;align-items:center}
+@media(max-width:540px){.buckets{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body class="p-6 md:p-12">
+<body>
+<div class="wrap">
+  <h1>Finance tracker</h1>
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
-            <div>
-                <h1 class="text-3xl font-semibold tracking-tight">Project Management Board</h1>
-                <p class="text-slate-400 mt-2">Freelance revenue and deadline tracking</p>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full md:w-auto">
-                <div class="card p-4 min-w-[140px]">
-                    <p class="stat-label">Fiverr</p>
-                    <p class="text-xl font-bold text-green-400">$0</p>
-                </div>
-                <div class="card p-4 min-w-[140px]">
-                    <p class="stat-label">Upwork</p>
-                    <p class="text-xl font-bold text-green-400">$0</p>
-                </div>
-                <div class="card p-4 min-w-[140px]">
-                    <p class="stat-label">Outside</p>
-                    <p class="text-xl font-bold text-green-400">$0</p>
-                </div>
-                <div class="card p-4 min-w-[140px] border-blue-500/50">
-                    <p class="stat-label">Total Revenue</p>
-                    <p class="text-xl font-bold text-blue-400">$0</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center mb-6 bg-slate-800/50 p-4 rounded-lg">
-            <div class="text-sm text-slate-400">0 Active Projects</div>
-            <button class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2">
-                <span>+</span> New Project
-            </button>
-        </div>
-
-        <div class="overflow-x-auto card">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-700 bg-slate-800/30">
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Project</th>
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Status</th>
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase">Client</th>
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase text-center">Priority</th>
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase text-right">Price</th>
-                        <th class="p-4 text-xs font-semibold text-slate-400 uppercase text-right">Time Left</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="6" class="p-20 text-center text-slate-500 italic">
-                            No projects currently in the pipeline.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <div class="section">
+    <div class="sec-title">Monthly income</div>
+    <div class="income-row">
+      <input type="number" id="incomeInput" placeholder="Enter income (BDT)" min="0"/>
+      <button class="btn btn-primary" onclick="addMonth()">+ Add month</button>
     </div>
+    <div class="buckets">
+      <div class="bucket"><div class="b-label">Savings <span class="b-pct">10%</span></div><div class="b-amt" id="b0">—</div><div class="b-bar"><div class="b-fill" style="width:10%;background:#5DCAA5"></div></div></div>
+      <div class="bucket"><div class="b-label">Goal fund <span class="b-pct">55%</span></div><div class="b-amt" id="b1">—</div><div class="b-bar"><div class="b-fill" style="width:55%;background:#7F77DD"></div></div></div>
+      <div class="bucket"><div class="b-label">Skill/invest <span class="b-pct">20%</span></div><div class="b-amt" id="b2">—</div><div class="b-bar"><div class="b-fill" style="width:20%;background:#378ADD"></div></div></div>
+      <div class="bucket"><div class="b-label">Personal <span class="b-pct">10%</span></div><div class="b-amt" id="b3">—</div><div class="b-bar"><div class="b-fill" style="width:10%;background:#EF9F27"></div></div></div>
+      <div class="bucket"><div class="b-label">Family <span class="b-pct">5%</span></div><div class="b-amt" id="b4">—</div><div class="b-bar"><div class="b-fill" style="width:5%;background:#D85A30"></div></div></div>
+    </div>
+    <p class="note" id="laptopNote"></p>
+  </div>
 
+  <div class="section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="sec-title" style="margin-bottom:0">Monthly log</div>
+      <button class="btn btn-danger" onclick="showResetConfirm()" id="resetBtn" style="display:none">Reset &amp; archive</button>
+    </div>
+    <div id="resetConfirm" style="display:none">
+      <div class="confirm-box">
+        <p>Archive all months and start fresh?</p>
+        <div class="confirm-btns">
+          <button class="btn" onclick="hideResetConfirm()">Cancel</button>
+          <button class="btn btn-warn" onclick="doReset()">Yes, archive</button>
+        </div>
+      </div>
+    </div>
+    <div id="logTable"><div class="empty">No months logged yet. Add your first month above.</div></div>
+  </div>
+
+  <div class="section" id="receiptsSection" style="display:none">
+    <div class="sec-title">Reset receipts</div>
+    <div id="receiptsList"></div>
+  </div>
+</div>
+
+<script>
+const BUCKETS=[
+  {key:'savings',label:'Savings',pct:0.10,color:'#5DCAA5'},
+  {key:'goal',label:'Goal fund',pct:0.55,color:'#7F77DD'},
+  {key:'skill',label:'Skill/invest',pct:0.20,color:'#378ADD'},
+  {key:'personal',label:'Personal',pct:0.10,color:'#EF9F27'},
+  {key:'family',label:'Family',pct:0.05,color:'#D85A30'}
+];
+function fmt(n){return Math.round(n).toLocaleString('en-BD')}
+
+let entries=[];
+let receipts=[];
+let pendingDelId=null;
+
+function loadData(){
+  try{entries=JSON.parse(localStorage.getItem('fin_entries')||'[]');}catch(_){entries=[];}
+  try{receipts=JSON.parse(localStorage.getItem('fin_receipts')||'[]');}catch(_){receipts=[];}
+}
+function saveData(){
+  localStorage.setItem('fin_entries',JSON.stringify(entries));
+  localStorage.setItem('fin_receipts',JSON.stringify(receipts));
+}
+
+document.getElementById('incomeInput').addEventListener('input',function(){
+  const v=parseFloat(this.value)||0;
+  BUCKETS.forEach((b,i)=>{document.getElementById('b'+i).textContent=v>0?fmt(v*b.pct)+' ৳':'—';});
+  const n=document.getElementById('laptopNote');
+  if(v>0){const mo=Math.ceil(120000/(v*0.55));n.textContent='At this income, laptop (120,000 ৳) reached in ~'+mo+' month'+(mo===1?'':'s')+' from Goal fund alone.';}
+  else n.textContent='';
+});
+
+function showMsg(msg){
+  const old=document.getElementById('inline-msg');if(old)old.remove();
+  const d=document.createElement('p');d.id='inline-msg';
+  d.style.cssText='font-size:13px;color:#a32d2d;margin-top:.5rem;';
+  d.textContent=msg;
+  document.getElementById('logTable').parentNode.appendChild(d);
+  setTimeout(()=>{const m=document.getElementById('inline-msg');if(m)m.remove();},2500);
+}
+
+function addMonth(){
+  const v=parseFloat(document.getElementById('incomeInput').value);
+  if(!v||v<=0){showMsg('Enter a valid income first.');return;}
+  const now=new Date();
+  const entry={id:Date.now(),date:now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),income:v};
+  BUCKETS.forEach(b=>entry[b.key]=Math.round(v*b.pct));
+  entries.push(entry);
+  saveData();render();
+  document.getElementById('incomeInput').value='';
+  BUCKETS.forEach((_,i)=>document.getElementById('b'+i).textContent='—');
+  document.getElementById('laptopNote').textContent='';
+}
+
+function showResetConfirm(){
+  if(!entries.length){showMsg('Nothing to reset yet.');return;}
+  document.getElementById('resetConfirm').style.display='block';
+}
+function hideResetConfirm(){document.getElementById('resetConfirm').style.display='none';}
+
+function doReset(){
+  hideResetConfirm();
+  if(!entries.length)return;
+  const totals={income:0};
+  BUCKETS.forEach(b=>totals[b.key]=0);
+  entries.forEach(e=>{totals.income+=e.income;BUCKETS.forEach(b=>totals[b.key]+=e[b.key]);});
+  receipts.unshift({
+    id:Date.now(),
+    resetDate:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),
+    startDate:entries[0].date,endDate:entries[entries.length-1].date,
+    months:entries.length,totals,entries:[...entries]
+  });
+  entries=[];
+  saveData();render();
+}
+
+function askDeleteReceipt(id){pendingDelId=id;renderReceipts();}
+function cancelDelete(){pendingDelId=null;renderReceipts();}
+function doDeleteReceipt(){
+  receipts=receipts.filter(r=>r.id!==pendingDelId);
+  pendingDelId=null;
+  saveData();render();
+}
+
+function render(){
+  renderLog();renderReceipts();
+  document.getElementById('resetBtn').style.display=entries.length?'block':'none';
+}
+
+function renderLog(){
+  const el=document.getElementById('logTable');
+  if(!entries.length){el.innerHTML='<div class="empty">No months logged yet. Add your first month above.</div>';return;}
+  const totals={income:0};
+  BUCKETS.forEach(b=>totals[b.key]=0);
+  entries.forEach(e=>{totals.income+=e.income;BUCKETS.forEach(b=>totals[b.key]+=e[b.key]);});
+  let rows='';
+  entries.forEach((e,i)=>{
+    rows+=`<tr><td style="color:#888">${i+1}. ${e.date}</td><td>${fmt(e.income)} ৳</td>${BUCKETS.map(b=>`<td>${fmt(e[b.key])}</td>`).join('')}</tr>`;
+  });
+  el.innerHTML=`<div style="overflow-x:auto"><table>
+    <tr><th>Month</th><th>Income</th>${BUCKETS.map(b=>`<th style="color:${b.color}">${b.label.split('/')[0]}</th>`).join('')}</tr>
+    ${rows}
+    <tr class="total-row"><td>Total (${entries.length} mo)</td><td>${fmt(totals.income)} ৳</td>${BUCKETS.map(b=>`<td>${fmt(totals[b.key])}</td>`).join('')}</tr>
+  </table></div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+    ${BUCKETS.map(b=>`<div class="bucket"><div class="b-label">${b.label}</div><div class="b-amt">${fmt(totals[b.key])} ৳</div><div class="b-bar"><div class="b-fill" style="width:${b.pct*100}%;background:${b.color}"></div></div></div>`).join('')}
+  </div>
+  ${totals.goal>=120000
+    ?'<p style="font-size:13px;color:#0f6e56;margin-top:.75rem;font-weight:500">Laptop goal reached in goal fund!</p>'
+    :`<p style="font-size:13px;color:#888;margin-top:.75rem">Goal fund: ${fmt(totals.goal)} / 120,000 ৳ for laptop (${Math.round(totals.goal/1200)}%)</p>`}`;
+}
+
+function renderReceipts(){
+  const sec=document.getElementById('receiptsSection');
+  const el=document.getElementById('receiptsList');
+  if(!receipts.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  el.innerHTML=receipts.map(r=>`
+    <div class="receipt-card">
+      <div class="receipt-header">
+        <div>
+          <div class="tag">Archived</div>
+          <div class="receipt-title">${r.months} month${r.months===1?'':'s'} — ${r.startDate} to ${r.endDate}</div>
+          <div class="receipt-date">Reset on ${r.resetDate}</div>
+        </div>
+        <div>
+          ${pendingDelId===r.id
+            ?`<div class="del-confirm"><span style="font-size:12px;color:#a32d2d">Delete?</span><button class="btn btn-warn" onclick="doDeleteReceipt()" style="padding:5px 10px;font-size:12px">Yes</button><button class="btn" onclick="cancelDelete()" style="padding:5px 10px;font-size:12px">No</button></div>`
+            :`<button class="btn btn-danger" onclick="askDeleteReceipt(${r.id})">Delete</button>`}
+        </div>
+      </div>
+      <div class="receipt-grid">
+        <div class="receipt-item"><span class="rk">Total income</span><span class="rv">${fmt(r.totals.income)} ৳</span></div>
+        ${BUCKETS.map(b=>`<div class="receipt-item"><span class="rk">${b.label}</span><span class="rv">${fmt(r.totals[b.key])} ৳</span></div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+loadData();
+render();
+</script>
 </body>
 </html>
